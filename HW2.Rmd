@@ -1,0 +1,101 @@
+---
+title: "ECMA 31130 HW2"
+author: "Yijing Zhang & Jeffrey Wang"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(testthat)
+require(xtable)
+require(pander)
+require(data.table)
+```
+
+## Question 1
+
+Because from the specification of $\log R_i$ that $\xi_i$ represents all the unobserved variables that determine the individual $i$'s non-labour income, the parameter $a$ of the model captures or leaves out the effect of these unobserved characteristics on the individual's disutility of labor. 
+
+```{r, results='hide'}
+p  = list(gamma = 0.8,beta=1,a=1,rho=1,eta=0.2,delta=-0.2,delta0=-0.1,nu=0.5) # parameters
+N=10000  # size of the simulation
+set.seed(123456)
+
+simdata = data.table(i=1:N,X=rnorm(N))
+
+# simulating variables
+simdata[,X := rnorm(N)]
+simdata[,Z := rnorm(N)]
+simdata[,u := rnorm(N)]
+simdata[,lw := p$eta*X  + Z + 0.2*u ]  # log wage
+
+simdata[,xi := rnorm(N)*0.2]
+simdata[,lr := lw + p$delta0+ p$delta*Z + xi]; # log home productivity
+
+simdata[,eps:=rnorm(N)*0.2]
+simdata[,beta := exp(p$nu*X  + p$a*xi + eps)]; # heterogenous beta coefficient
+
+# compute decision variables
+simdata[, lfp := log(p$rho) + lw >= lr] # labor force participation
+simdata[, h   := (p$rho * exp(lw)/beta)^(1/p$gamma)] # hours
+simdata[lfp==FALSE,h:=NA][lfp==FALSE,lw:=NA]
+simdata[,mean(lfp)]
+
+simdata[, lh := log(h)]
+```
+
+## Question 2
+
+For a = 0:
+
+```{r, results = 'hide'}
+pander(summary(lm(lh ~ lw + X, simdata)))
+```
+---------------------------------------------------------------
+     &nbsp;        Estimate    Std. Error   t value   Pr(>|t|) 
+----------------- ----------- ------------ --------- ----------
+ **(Intercept)**   -0.001408    0.003429    -0.4106    0.6814  
+
+     **lw**          1.246      0.003594     346.7       0     
+
+      **X**         -0.6268     0.003202    -195.8       0     
+---------------------------------------------------------------
+
+
+--------------------------------------------------------------
+ Observations   Residual Std. Error   $R^2$    Adjusted $R^2$ 
+-------------- --------------------- -------- ----------------
+     6408             0.2487          0.9545       0.9545     
+--------------------------------------------------------------
+
+For a = 1:
+
+----------------------------------------------------------------
+     &nbsp;        Estimate   Std. Error   t value    Pr(>|t|)  
+----------------- ---------- ------------ --------- ------------
+ **(Intercept)**    0.1415     0.004356     32.49    1.851e-214 
+
+     **lw**          1.15      0.004565     251.9        0      
+
+      **X**        -0.6111     0.004068    -150.2        0      
+----------------------------------------------------------------
+
+
+--------------------------------------------------------------
+ Observations   Residual Std. Error   $R^2$    Adjusted $R^2$ 
+-------------- --------------------- -------- ----------------
+     6408              0.316          0.9187       0.9187     
+--------------------------------------------------------------
+
+
+We observe that the coefficients for log wage and X have larger absolute values when we set parameter $a = 0$ than when we set $a = 1$. Because if $a \neq 0$, then the term $a\xi_i$ becomes an omitted variable that enters the regression of log hours on log wage and X, which will absorb its effect on the individual's labour decision from the coefficients of log wage and X. In other words, if an individual's disutility of labour becomes correlated with his/her non-labour income, then the coefficients in front of log wage and X are biased, since we no longer have the exogeneity condition on $\epsilon_i$. 
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
