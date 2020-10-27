@@ -1,7 +1,9 @@
 ---
 title: "ECMA 31130 HW2"
 author: "Yijing Zhang & Jeffrey Wang"
-output: pdf_document
+output: 
+   pdf_document:
+      extra_dependencies: ["bbm", "threeparttable"]
 ---
 
 ```{r setup, include=FALSE}
@@ -88,7 +90,34 @@ For a = 1:
 --------------------------------------------------------------
 
 
-We observe that the coefficients for log wage and X have larger absolute values when we set parameter $a = 0$ than when we set $a = 1$. Because if $a \neq 0$, then the term $a\xi_i$ becomes an omitted variable that enters the regression of log hours on log wage and X, which will absorb its effect on the individual's labour decision from the coefficients of log wage and X. In other words, if an individual's disutility of labour becomes correlated with his/her non-labour income, then the coefficients in front of log wage and X are biased, since we no longer have the exogeneity condition on $\epsilon_i$. 
+We observe that the coefficients for log wage and X have larger absolute values when we set parameter $a = 0$ than when we set $a = 1$. Because if $a \neq 0$, then the term $a\xi_i$ becomes an omitted variable that enters the regression of log hours on log wage and X, which will absorb its effect on the individual's labour decision from the coefficients of log wage and X. In other words, if an individual's disutility of labour becomes correlated with her non-labour income, then the coefficients in front of log wage and X are biased, since we no longer have the exogeneity condition on $\epsilon_i$. 
+
+## Question 3
+
+We begin by deriving the FOC and its log linear form when $e = 1$.
+
+
+Call $\tilde{h}^*$ and $\tilde{w}^*$ the log observed observed hours and consumption when $lfp = 1$, we write out our log linear form and replace $\beta$ with our specification:
+
+$$
+ \tilde{h}^* = \frac{1}{\gamma}\log \rho + \frac{1}{\gamma}  \tilde{w}^* - \frac{1}{\gamma} (\nu x_i + \epsilon_i + a\xi_i)
+$$
+$$
+ \tilde{h}^* = \frac{1}{\gamma}  \tilde{w}^* - \frac{\nu}{\gamma}x_i - \frac{\epsilon_i}{\gamma} - \frac{a\xi_i}{\gamma} + \frac{1}{\gamma} \log \rho
+$$
+Now we take the conditional expectation of hours based on everything we observe
+$$
+E[ \tilde{h}^* |\tilde{w},x_i,z_i,lfp = 1 ] = \frac{1}{\gamma} \tilde{w} - \frac{\nu}{\gamma}x_i - \frac{1}{\gamma} E[\epsilon_i + a\xi_i |\tilde{w},x_i,z_i,lfp = 1 ] + \frac{1}{\gamma} \log \rho
+$$
+We now take a better look at our heckman correction term. Since $\epsilon_i$ is independent and mean zero,
+$$
+E[\epsilon_i | \tilde{w},x_i,z_i,lfp = 1] = 0 \\
+
+
+E[a\xi_i|lfp = 1 ] &= E[\xi_i|\log w_i + \log \rho > \log R ]\\ &= E[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ &= aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]\\
+$$
+Since $\rho = 0$, we do a probit of $lfp$ on $z_i$ to get $\delta_0$ and $\delta$. 
+
 
 ## Including Plots
 
