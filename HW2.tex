@@ -369,7 +369,7 @@ E[\epsilon_i | \tilde{w},x_i,z_i,lfp = 1] = 0
 \]
 
 \[
-E[a\xi_i|lfp = 1 ] = E[\xi_i|\log w_i + \log \rho > \log R ]\\ = E[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ = aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]\\
+E[a\xi_i|lfp = 1 ] = aE[\xi_i|\log w_i + \log \rho > \log R ]\\ = aE[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ = aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]\\
 \]
 
 Since \(\rho = 0\), we do a probit of \(lfp\) on \(z_i\) to get
@@ -495,12 +495,150 @@ Adjusted \(R^2\)\strut
 \bottomrule
 \end{longtable}
 
+Q5
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{simulate }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(p,N,t) \{}
+\NormalTok{    simdata }\OtherTok{=} \FunctionTok{data.table}\NormalTok{(}\AttributeTok{i=}\DecValTok{1}\SpecialCharTok{:}\NormalTok{N,}\AttributeTok{X=}\FunctionTok{rnorm}\NormalTok{(N))}
+    
+    \CommentTok{\# simulating variables}
+\NormalTok{    simdata[,X }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{rnorm}\NormalTok{(N)]}
+\NormalTok{    simdata[,Z }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{rnorm}\NormalTok{(N)]}
+\NormalTok{    simdata[,u }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{rnorm}\NormalTok{(N)]}
+\NormalTok{    simdata[,lw }\SpecialCharTok{:}\ErrorTok{=}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{eta}\SpecialCharTok{*}\NormalTok{X }\SpecialCharTok{+}\NormalTok{ Z }\SpecialCharTok{+} \FloatTok{0.2}\SpecialCharTok{*}\NormalTok{u ]  }\CommentTok{\# log wage}
+    
+\NormalTok{    simdata[,xi }\SpecialCharTok{:}\ErrorTok{=} \SpecialCharTok{{-}}\FunctionTok{rexp}\NormalTok{(N)]}
+\NormalTok{    simdata[,lr }\SpecialCharTok{:}\ErrorTok{=}\NormalTok{ lw }\SpecialCharTok{+}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{delta0 }\SpecialCharTok{+}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{delta}\SpecialCharTok{*}\NormalTok{Z }\SpecialCharTok{+}\NormalTok{ xi]; }\CommentTok{\# log home productivity}
+    
+\NormalTok{    simdata[,eps}\SpecialCharTok{:}\ErrorTok{=}\FunctionTok{rnorm}\NormalTok{(N)}\SpecialCharTok{*}\FloatTok{0.2}\NormalTok{]}
+\NormalTok{    simdata[,beta }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{exp}\NormalTok{(p}\SpecialCharTok{$}\NormalTok{nu}\SpecialCharTok{*}\NormalTok{X  }\SpecialCharTok{+}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{a}\SpecialCharTok{*}\NormalTok{xi }\SpecialCharTok{+}\NormalTok{  eps)]; }\CommentTok{\# heterogenous beta coefficient}
+    
+    \CommentTok{\# compute decision variables}
+\NormalTok{    simdata[, lfp }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{log}\NormalTok{(p}\SpecialCharTok{$}\NormalTok{rho) }\SpecialCharTok{+}\NormalTok{ lw }\SpecialCharTok{\textgreater{}=}\NormalTok{ lr] }\CommentTok{\# labor force participation}
+\NormalTok{    simdata[, h   }\SpecialCharTok{:}\ErrorTok{=}\NormalTok{ (p}\SpecialCharTok{$}\NormalTok{rho }\SpecialCharTok{*} \FunctionTok{exp}\NormalTok{(lw)}\SpecialCharTok{/}\NormalTok{beta)}\SpecialCharTok{\^{}}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\NormalTok{p}\SpecialCharTok{$}\NormalTok{gamma)] }\CommentTok{\# hours}
+    
+    \CommentTok{\# make hours and wages unobserved in case individual doesn\textquotesingle{}t work}
+\NormalTok{    simdata[lfp}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{,h}\SpecialCharTok{:}\ErrorTok{=}\ConstantTok{NA}\NormalTok{][lfp}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{,lw}\SpecialCharTok{:}\ErrorTok{=}\ConstantTok{NA}\NormalTok{]}
+\NormalTok{    simdata[,}\FunctionTok{mean}\NormalTok{(lfp)]}
+    
+    \CommentTok{\# store time}
+\NormalTok{    simdata[, t }\SpecialCharTok{:}\ErrorTok{=}\NormalTok{ t]}
+    \FunctionTok{return}\NormalTok{(simdata)}
+\NormalTok{  \}}
+
+\NormalTok{p  }\OtherTok{=} \FunctionTok{list}\NormalTok{(}\AttributeTok{gamma =} \FloatTok{0.8}\NormalTok{,}\AttributeTok{beta=}\DecValTok{1}\NormalTok{,}\AttributeTok{a=}\DecValTok{1}\NormalTok{,}\AttributeTok{rho=}\DecValTok{1}\NormalTok{,}\AttributeTok{eta=}\FloatTok{0.2}\NormalTok{,}\AttributeTok{delta=}\SpecialCharTok{{-}}\FloatTok{1.0}\NormalTok{,}\AttributeTok{delta0=}\SpecialCharTok{{-}}\FloatTok{0.1}\NormalTok{,}\AttributeTok{nu=}\FloatTok{0.5}\NormalTok{) }\CommentTok{\# parameters}
+\NormalTok{N}\OtherTok{=}\DecValTok{50000}  \CommentTok{\# size of the simulation}
+
+\CommentTok{\# simulate period 1 }
+\NormalTok{sim1  }\OtherTok{=} \FunctionTok{simulate}\NormalTok{(p,N,}\DecValTok{1}\NormalTok{); }
+\NormalTok{p}\SpecialCharTok{$}\NormalTok{eta }\OtherTok{=} \FloatTok{0.4}\NormalTok{; p}\SpecialCharTok{$}\NormalTok{delta0 }\OtherTok{=} \SpecialCharTok{{-}}\FloatTok{1.1}
+\CommentTok{\# simulate period 2 with different eta and delta0 (incuding intercept shifts and variation in wages)}
+\NormalTok{sim2 }\OtherTok{=} \FunctionTok{simulate}\NormalTok{(p,N,}\DecValTok{2}\NormalTok{); }
+\NormalTok{simdata }\OtherTok{=} \FunctionTok{rbind}\NormalTok{(sim1,sim2) }\CommentTok{\# combine the two period}
+
+\NormalTok{simdata[, lh }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{log}\NormalTok{(h)]}
+\NormalTok{fit5 }\OtherTok{=} \FunctionTok{summary}\NormalTok{(}\FunctionTok{lm}\NormalTok{(lh }\SpecialCharTok{\textasciitilde{}}\NormalTok{ lw }\SpecialCharTok{+}\NormalTok{ X,simdata))}
+\FunctionTok{pander}\NormalTok{(fit5)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}ccccc@{}}
+\toprule
+\begin{minipage}[b]{0.21\columnwidth}\centering
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\centering
+Estimate\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\centering
+Std. Error\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+t value\strut
+\end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\centering
+Pr(\textgreater\textbar t\textbar)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.21\columnwidth}\centering
+\textbf{(Intercept)}\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+1.399\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
+0.00451\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+310.1\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.21\columnwidth}\centering
+\textbf{lw}\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+1.073\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
+0.004756\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+225.5\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.21\columnwidth}\centering
+\textbf{X}\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+-0.5681\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
+0.004628\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+-122.8\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+0\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}cccc@{}}
+\caption{Fitting linear model: lh \textasciitilde{} lw +
+X}\tabularnewline
+\toprule
+\begin{minipage}[b]{0.18\columnwidth}\centering
+Observations\strut
+\end{minipage} & \begin{minipage}[b]{0.27\columnwidth}\centering
+Residual Std. Error\strut
+\end{minipage} & \begin{minipage}[b]{0.11\columnwidth}\centering
+\(R^2\)\strut
+\end{minipage} & \begin{minipage}[b]{0.21\columnwidth}\centering
+Adjusted \(R^2\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{0.18\columnwidth}\centering
+Observations\strut
+\end{minipage} & \begin{minipage}[b]{0.27\columnwidth}\centering
+Residual Std. Error\strut
+\end{minipage} & \begin{minipage}[b]{0.11\columnwidth}\centering
+\(R^2\)\strut
+\end{minipage} & \begin{minipage}[b]{0.21\columnwidth}\centering
+Adjusted \(R^2\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.18\columnwidth}\centering
+87093\strut
+\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering
+1.303\strut
+\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering
+0.3822\strut
+\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
+0.3822\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
 \hypertarget{including-plots}{%
 \subsection{Including Plots}\label{including-plots}}
 
 You can also embed plots, for example:
 
-\includegraphics{HW2-1_files/figure-latex/pressure-1.pdf}
+\includegraphics{HW2_files/figure-latex/pressure-1.pdf}
 
 Note that the \texttt{echo\ =\ FALSE} parameter was added to the code
 chunk to prevent printing of the R code that generated the plot.

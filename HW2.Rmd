@@ -1,9 +1,13 @@
 ---
 title: "ECMA 31130 HW2"
 author: "Yijing Zhang & Jeffrey Wang"
-output: 
-   pdf_document:
-      extra_dependencies: ["bbm", "threeparttable"]
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    extra_dependencies:
+    - bbm
+    - threeparttable
 ---
 
 ```{r setup, include=FALSE}
@@ -117,7 +121,7 @@ E[\epsilon_i | \tilde{w},x_i,z_i,lfp = 1] = 0
 $$
 
 $$
-E[a\xi_i|lfp = 1 ] = E[\xi_i|\log w_i + \log \rho > \log R ]\\ = E[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ = aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]\\
+E[a\xi_i|lfp = 1 ] = aE[\xi_i|\log w_i + \log \rho > \log R ]\\ = aE[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ = aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]\\
 $$
 
 Since $\rho = 0$, we do a probit of $lfp$ on $z_i$ to get $\delta_0$ and $\delta$.
@@ -125,8 +129,7 @@ Since $\rho = 0$, we do a probit of $lfp$ on $z_i$ to get $\delta_0$ and $\delta
 fit2 = glm(lfp ~ Z,simdata,family = binomial(link = "probit"))
 pander(summary(fit2)) 
 ```
-
-
+## Question 4
 #construct the inverse Mills ratio.
 ```{r, results = 'hide'}
 simdata[, ai := predict(fit2)]  
@@ -148,7 +151,6 @@ pander(fit3)
       **m**         0.293      0.02836      10.33    8.009e-25 
 ---------------------------------------------------------------
 
-
 -------------------------------------------------------------
  Observations   Residual Std. Error   $R^2$   Adjusted $R^2$ 
 -------------- --------------------- ------- ----------------
@@ -157,7 +159,163 @@ pander(fit3)
 
 Table: Fitting linear model: lh ~ lw + X + m
 
-## Including Plots
+
+## Question 6
+
+```{r, results='hide'}
+simulate <- function(p,N,t) {
+    set.seed(123456)
+    simdata = data.table(i=1:N,X=rnorm(N))
+    
+    # simulating variables
+    simdata[,X := rnorm(N)]
+    simdata[,Z := rnorm(N)]
+    simdata[,u := rnorm(N)]
+    simdata[,lw := p$eta*X + Z + 0.2*u ]  # log wage
+    
+    simdata[,xi := -rexp(N)]
+    simdata[,lr := lw + p$delta0 + p$delta*Z + xi]; # log home productivity
+    
+    simdata[,eps:=rnorm(N)*0.2]
+    simdata[,beta := exp(p$nu*X  + p$a*xi +  eps)]; # heterogenous beta coefficient
+    
+    # compute decision variables
+    simdata[, lfp := log(p$rho) + lw >= lr] # labor force participation
+    simdata[, h   := (p$rho * exp(lw)/beta)^(1/p$gamma)] # hours
+    
+    # make hours and wages unobserved in case individual doesn't work
+    simdata[lfp==FALSE,h:=NA][lfp==FALSE,lw:=NA]
+    simdata[,mean(lfp)]
+    
+    # store time
+    simdata[, t := t]
+    return(simdata)
+  }
+
+p  = list(gamma = 0.8,beta=1,a=1,rho=1,eta=0.2,delta=-1.0,delta0=-0.1,nu=0.5) # parameters
+N=50000  # size of the simulation
+
+# simulate period 1 
+sim1  = simulate(p,N,1); 
+p$eta = 0.4; p$delta0 = -1.1
+# simulate period 2 with different eta and delta0 (incuding intercept shifts and variation in wages)
+sim2 = simulate(p,N,2); 
+simdata = rbind(sim1,sim2) # combine the two period
+
+simdata[, lh := log(h)]
+fit5 = summary(lm(lh ~ lw + X,simdata))
+pander(fit5)
+```
+
+--------------------------------------------------------------
+     &nbsp;        Estimate   Std. Error   t value   Pr(>|t|) 
+----------------- ---------- ------------ --------- ----------
+ **(Intercept)**    1.399      0.004515     309.9       0     
+
+     **lw**         1.075      0.00479      224.3       0     
+
+      **X**        -0.5727     0.004647    -123.2       0     
+--------------------------------------------------------------
+
+
+--------------------------------------------------------------
+ Observations   Residual Std. Error   $R^2$    Adjusted $R^2$ 
+-------------- --------------------- -------- ----------------
+    86961              1.303          0.3806       0.3806     
+--------------------------------------------------------------
+
+Table: Fitting linear model: lh ~ lw + X
+
+
+```{r, results = 'hide'}
+# construct the IMR, include in the regression and run
+fit6 = glm(lfp ~ Z,simdata,family = binomial(link = "probit"))
+pander(summary(fit6)) 
+simdata[, ai := predict(fit6)]
+simdata[, m := dnorm(ai)/pnorm(ai)]
+fit7 = summary(lm(lh ~ lw + X + m,simdata))
+pander(fit7)
+# Including Plots
+```
+
+----------------------------------------------------------------
+     &nbsp;        Estimate   Std. Error   t value    Pr(>|t|)  
+----------------- ---------- ------------ --------- ------------
+ **(Intercept)**    1.213      0.006785     178.8        0      
+
+     **lw**         1.275      0.007253     175.8        0      
+
+      **X**        -0.6352     0.004919    -129.1        0      
+
+      **m**         1.003      0.02745      36.53    5.096e-290 
+----------------------------------------------------------------
+
+
+-------------------------------------------------------------
+ Observations   Residual Std. Error   $R^2$   Adjusted $R^2$ 
+-------------- --------------------- ------- ----------------
+    86961              1.293          0.39        0.3899     
+-------------------------------------------------------------
+
+Table: Fitting linear model: lh ~ lw + X + m
+
+
+## Question 7
+```{r, results='hide'}
+#slice the Z variables into deciles
+simdata$Zbin <- cut(simdata$Z, breaks = 10, labels = c("1", "2", "3","4","5","6","7","8","9","10"))
+#regress log-hours on log-wage, X, dummies for each of the bins, and time t
+fit8 = summary(lm(lh ~ lw + X + factor(Zbin) + factor(t),simdata))
+pander(fit8)
+```
+
+------------------------------------------------------------------
+       &nbsp;         Estimate   Std. Error   t value   Pr(>|t|)  
+-------------------- ---------- ------------ --------- -----------
+  **(Intercept)**      3.718       0.2319      16.03    9.662e-58 
+
+       **lw**          1.176      0.01355      86.79        0     
+
+       **X**          -0.6041     0.006038     -100         0     
+
+ **factor(Zbin)3**    -0.8963      0.236      -3.798    0.0001459 
+
+ **factor(Zbin)4**     -1.729      0.2299     -7.522    5.442e-14 
+
+ **factor(Zbin)5**     -2.139      0.2307     -9.274    1.837e-20 
+
+ **factor(Zbin)6**     -2.327      0.2323     -10.02    1.317e-23 
+
+ **factor(Zbin)7**     -2.283      0.2346     -9.732    2.258e-22 
+
+ **factor(Zbin)8**     -2.257      0.2376     -9.498    2.184e-21 
+
+ **factor(Zbin)9**     -2.21       0.2433     -9.082    1.084e-19 
+
+ **factor(Zbin)10**    -1.963      0.2712     -7.238    4.575e-13 
+
+   **factor(t)2**     -0.2208     0.008893    -24.83    1.22e-135 
+------------------------------------------------------------------
+
+
+--------------------------------------------------------------
+ Observations   Residual Std. Error   $R^2$    Adjusted $R^2$ 
+-------------- --------------------- -------- ----------------
+    86961              1.291          0.3924       0.3923     
+--------------------------------------------------------------
+
+Table: Fitting linear model: lh ~ lw + X + factor(Zbin) + factor(t)
+
+
+
+
+
+
+
+
+
+
+
 
 You can also embed plots, for example:
 
