@@ -117,16 +117,19 @@ E[\epsilon_i | \tilde{w},x_i,z_i,lfp = 1] = 0
 $$
 
 $$
-E[a\xi_i|lfp = 1 ] = E[\xi_i|\log w_i + \log \rho > \log R ]\\ = E[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ = aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]\\
+E[a\xi_i|lfp = 1 ] = E[\xi_i|\log w_i + \log \rho > \log R ]\\ = E[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ = aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]
 $$
-
-Since $\rho = 0$, we do a probit of $lfp$ on $z_i$ to get $\delta_0$ and $\delta$.
+Now let's take $\rho = 1$ to make $\log \rho = 0$, we express the inverse mills ratio:
+$$
+\lambda_i = E[\xi_i| \xi_i <  - \delta_0 - \delta z_i ] = -\frac{\sigma_{\xi_i} \Phi'(\frac{-\delta_0 - \delta z_i}{\sigma_{\xi_i}})}{\Phi(\frac{-\delta_0 - \delta z_i}{\sigma_{\xi_i}})}
+$$
+We do a probit of $lfp$ on $z_i$ to get $\delta_0$ and $\delta$.
 ```{r, results = 'hide'}
 fit2 = glm(lfp ~ Z,simdata,family = binomial(link = "probit"))
 pander(summary(fit2)) 
 ```
 
-
+## Question 4
 #construct the inverse Mills ratio.
 ```{r, results = 'hide'}
 simdata[, ai := predict(fit2)]  
@@ -157,12 +160,21 @@ pander(fit3)
 
 Table: Fitting linear model: lh ~ lw + X + m
 
-## Including Plots
+We see that our estimated coefficients indeed correspond to our results before when we set $a=0$. But now our model have $a=1$.
 
-You can also embed plots, for example:
+## Question 5
+From Q3 we have
+$$
+E[\xi_i | \xi_i < -\delta_0 - \delta z_i]
+$$
+And since we have $\xi_i \sim -exp$, we can write
+$$
+E[\xi_i | \xi_i < -\delta_0 - \delta z_i] = 1 - \delta_0 - \delta z_i
+$$
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
