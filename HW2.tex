@@ -1,6 +1,3 @@
-\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
-\PassOptionsToPackage{hyphens}{url}
-%
 \documentclass[]{article}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -9,32 +6,29 @@
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
-  \usepackage{textcomp} % provides euro and other symbols
 \else % if luatex or xelatex
-  \usepackage{unicode-math}
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
   \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
 \fi
 % use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 % use microtype if available
 \IfFileExists{microtype.sty}{%
-\usepackage[]{microtype}
+\usepackage{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\IfFileExists{parskip.sty}{%
-\usepackage{parskip}
-}{% else
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
-}
+\usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
-\hypersetup{
+\hypersetup{unicode=true,
             pdftitle={ECMA 31130 HW2},
             pdfauthor={Yijing Zhang \& Jeffrey Wang},
             pdfborder={0 0 0},
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
-\usepackage[margin=1in]{geometry}
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -76,8 +70,6 @@
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{longtable,booktabs}
-% Fix footnotes in tables (requires footnote package)
-\IfFileExists{footnote.sty}{\usepackage{footnote}\makesavenoteenv{longtable}}{}
 \usepackage{graphicx,grffile}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -87,6 +79,12 @@
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -101,17 +99,33 @@
 \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
 
-% set default figure placement to htbp
-\makeatletter
-\def\fps@figure{htbp}
-\makeatother
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
 
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{ECMA 31130 HW2}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Yijing Zhang \& Jeffrey Wang}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+    \date{}
+    \predate{}\postdate{}
+  
 \usepackage{bbm}
 \usepackage{threeparttable}
-
-\title{ECMA 31130 HW2}
-\author{Yijing Zhang \& Jeffrey Wang}
-\date{}
 
 \begin{document}
 \maketitle
@@ -127,31 +141,31 @@ disutility of labor.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{p  =}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{gamma =} \FloatTok{0.8}\NormalTok{,}\DataTypeTok{beta=}\DecValTok{1}\NormalTok{,}\DataTypeTok{a=}\DecValTok{1}\NormalTok{,}\DataTypeTok{rho=}\DecValTok{1}\NormalTok{,}\DataTypeTok{eta=}\FloatTok{0.2}\NormalTok{,}\DataTypeTok{delta=}\OperatorTok{-}\FloatTok{0.2}\NormalTok{,}\DataTypeTok{delta0=}\OperatorTok{-}\FloatTok{0.1}\NormalTok{,}\DataTypeTok{nu=}\FloatTok{0.5}\NormalTok{) }\CommentTok{# parameters}
-\NormalTok{N=}\DecValTok{10000}  \CommentTok{# size of the simulation}
-\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123456}\NormalTok{)}
+\NormalTok{p  }\OtherTok{=} \FunctionTok{list}\NormalTok{(}\AttributeTok{gamma =} \FloatTok{0.8}\NormalTok{,}\AttributeTok{beta=}\DecValTok{1}\NormalTok{,}\AttributeTok{a=}\DecValTok{1}\NormalTok{,}\AttributeTok{rho=}\DecValTok{1}\NormalTok{,}\AttributeTok{eta=}\FloatTok{0.2}\NormalTok{,}\AttributeTok{delta=}\SpecialCharTok{{-}}\FloatTok{0.2}\NormalTok{,}\AttributeTok{delta0=}\SpecialCharTok{{-}}\FloatTok{0.1}\NormalTok{,}\AttributeTok{nu=}\FloatTok{0.5}\NormalTok{) }\CommentTok{\# parameters}
+\NormalTok{N}\OtherTok{=}\DecValTok{10000}  \CommentTok{\# size of the simulation}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123456}\NormalTok{)}
 
-\NormalTok{simdata =}\StringTok{ }\KeywordTok{data.table}\NormalTok{(}\DataTypeTok{i=}\DecValTok{1}\OperatorTok{:}\NormalTok{N,}\DataTypeTok{X=}\KeywordTok{rnorm}\NormalTok{(N))}
+\NormalTok{simdata }\OtherTok{=} \FunctionTok{data.table}\NormalTok{(}\AttributeTok{i=}\DecValTok{1}\SpecialCharTok{:}\NormalTok{N,}\AttributeTok{X=}\FunctionTok{rnorm}\NormalTok{(N))}
 
-\CommentTok{# simulating variables}
-\NormalTok{simdata[,X }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(N)]}
-\NormalTok{simdata[,Z }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(N)]}
-\NormalTok{simdata[,u }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(N)]}
-\NormalTok{simdata[,lw }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\NormalTok{p}\OperatorTok{$}\NormalTok{eta}\OperatorTok{*}\NormalTok{X  }\OperatorTok{+}\StringTok{ }\NormalTok{Z }\OperatorTok{+}\StringTok{ }\FloatTok{0.2}\OperatorTok{*}\NormalTok{u ]  }\CommentTok{# log wage}
+\CommentTok{\# simulating variables}
+\NormalTok{simdata[,X }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{rnorm}\NormalTok{(N)]}
+\NormalTok{simdata[,Z }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{rnorm}\NormalTok{(N)]}
+\NormalTok{simdata[,u }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{rnorm}\NormalTok{(N)]}
+\NormalTok{simdata[,lw }\SpecialCharTok{:}\ErrorTok{=}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{eta}\SpecialCharTok{*}\NormalTok{X  }\SpecialCharTok{+}\NormalTok{ Z }\SpecialCharTok{+} \FloatTok{0.2}\SpecialCharTok{*}\NormalTok{u ]  }\CommentTok{\# log wage}
 
-\NormalTok{simdata[,xi }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(N)}\OperatorTok{*}\FloatTok{0.2}\NormalTok{]}
-\NormalTok{simdata[,lr }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\NormalTok{lw }\OperatorTok{+}\StringTok{ }\NormalTok{p}\OperatorTok{$}\NormalTok{delta0}\OperatorTok{+}\StringTok{ }\NormalTok{p}\OperatorTok{$}\NormalTok{delta}\OperatorTok{*}\NormalTok{Z }\OperatorTok{+}\StringTok{ }\NormalTok{xi]; }\CommentTok{# log home productivity}
+\NormalTok{simdata[,xi }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{rnorm}\NormalTok{(N)}\SpecialCharTok{*}\FloatTok{0.2}\NormalTok{]}
+\NormalTok{simdata[,lr }\SpecialCharTok{:}\ErrorTok{=}\NormalTok{ lw }\SpecialCharTok{+}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{delta0}\SpecialCharTok{+}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{delta}\SpecialCharTok{*}\NormalTok{Z }\SpecialCharTok{+}\NormalTok{ xi]; }\CommentTok{\# log home productivity}
 
-\NormalTok{simdata[,eps}\OperatorTok{:}\ErrorTok{=}\KeywordTok{rnorm}\NormalTok{(N)}\OperatorTok{*}\FloatTok{0.2}\NormalTok{]}
-\NormalTok{simdata[,beta }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{exp}\NormalTok{(p}\OperatorTok{$}\NormalTok{nu}\OperatorTok{*}\NormalTok{X  }\OperatorTok{+}\StringTok{ }\NormalTok{p}\OperatorTok{$}\NormalTok{a}\OperatorTok{*}\NormalTok{xi }\OperatorTok{+}\StringTok{ }\NormalTok{eps)]; }\CommentTok{# heterogenous beta coefficient}
+\NormalTok{simdata[,eps}\SpecialCharTok{:}\ErrorTok{=}\FunctionTok{rnorm}\NormalTok{(N)}\SpecialCharTok{*}\FloatTok{0.2}\NormalTok{]}
+\NormalTok{simdata[,beta }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{exp}\NormalTok{(p}\SpecialCharTok{$}\NormalTok{nu}\SpecialCharTok{*}\NormalTok{X  }\SpecialCharTok{+}\NormalTok{ p}\SpecialCharTok{$}\NormalTok{a}\SpecialCharTok{*}\NormalTok{xi }\SpecialCharTok{+}\NormalTok{ eps)]; }\CommentTok{\# heterogenous beta coefficient}
 
-\CommentTok{# compute decision variables}
-\NormalTok{simdata[, lfp }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{log}\NormalTok{(p}\OperatorTok{$}\NormalTok{rho) }\OperatorTok{+}\StringTok{ }\NormalTok{lw }\OperatorTok{>=}\StringTok{ }\NormalTok{lr] }\CommentTok{# labor force participation}
-\NormalTok{simdata[, h   }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\NormalTok{(p}\OperatorTok{$}\NormalTok{rho }\OperatorTok{*}\StringTok{ }\KeywordTok{exp}\NormalTok{(lw)}\OperatorTok{/}\NormalTok{beta)}\OperatorTok{^}\NormalTok{(}\DecValTok{1}\OperatorTok{/}\NormalTok{p}\OperatorTok{$}\NormalTok{gamma)] }\CommentTok{# hours}
-\NormalTok{simdata[lfp}\OperatorTok{==}\OtherTok{FALSE}\NormalTok{,h}\OperatorTok{:}\ErrorTok{=}\OtherTok{NA}\NormalTok{][lfp}\OperatorTok{==}\OtherTok{FALSE}\NormalTok{,lw}\OperatorTok{:}\ErrorTok{=}\OtherTok{NA}\NormalTok{]}
-\NormalTok{simdata[,}\KeywordTok{mean}\NormalTok{(lfp)]}
+\CommentTok{\# compute decision variables}
+\NormalTok{simdata[, lfp }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{log}\NormalTok{(p}\SpecialCharTok{$}\NormalTok{rho) }\SpecialCharTok{+}\NormalTok{ lw }\SpecialCharTok{\textgreater{}=}\NormalTok{ lr] }\CommentTok{\# labor force participation}
+\NormalTok{simdata[, h   }\SpecialCharTok{:}\ErrorTok{=}\NormalTok{ (p}\SpecialCharTok{$}\NormalTok{rho }\SpecialCharTok{*} \FunctionTok{exp}\NormalTok{(lw)}\SpecialCharTok{/}\NormalTok{beta)}\SpecialCharTok{\^{}}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\NormalTok{p}\SpecialCharTok{$}\NormalTok{gamma)] }\CommentTok{\# hours}
+\NormalTok{simdata[lfp}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{,h}\SpecialCharTok{:}\ErrorTok{=}\ConstantTok{NA}\NormalTok{][lfp}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{,lw}\SpecialCharTok{:}\ErrorTok{=}\ConstantTok{NA}\NormalTok{]}
+\NormalTok{simdata[,}\FunctionTok{mean}\NormalTok{(lfp)]}
 
-\NormalTok{simdata[, lh }\OperatorTok{:}\ErrorTok{=}\StringTok{ }\KeywordTok{log}\NormalTok{(h)]}
+\NormalTok{simdata[, lh }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{log}\NormalTok{(h)]}
 \end{Highlighting}
 \end{Shaded}
 
@@ -162,7 +176,7 @@ For a = 0:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{pander}\NormalTok{(}\KeywordTok{summary}\NormalTok{(}\KeywordTok{lm}\NormalTok{(lh }\OperatorTok{~}\StringTok{ }\NormalTok{lw }\OperatorTok{+}\StringTok{ }\NormalTok{X, simdata)))}
+\FunctionTok{pander}\NormalTok{(}\FunctionTok{summary}\NormalTok{(}\FunctionTok{lm}\NormalTok{(lh }\SpecialCharTok{\textasciitilde{}}\NormalTok{ lw }\SpecialCharTok{+}\NormalTok{ X, simdata)))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -177,7 +191,7 @@ Std. Error\strut
 \end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
 t value\strut
 \end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\centering
-Pr(\textgreater{}\textbar{}t\textbar{})\strut
+Pr(\textgreater\textbar t\textbar)\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
@@ -255,7 +269,7 @@ Std. Error\strut
 \end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
 t value\strut
 \end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\centering
-Pr(\textgreater{}\textbar{}t\textbar{})\strut
+Pr(\textgreater\textbar t\textbar)\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
@@ -347,26 +361,149 @@ replace \(\beta\) with our specification:
 we observe \[
 E[ \tilde{h}^* |\tilde{w},x_i,z_i,lfp = 1 ] = \frac{1}{\gamma} \tilde{w} - \frac{\nu}{\gamma}x_i - \frac{1}{\gamma} E[\epsilon_i + a\xi_i |\tilde{w},x_i,z_i,lfp = 1 ] + \frac{1}{\gamma} \log \rho
 \] We now take a better look at our heckman correction term. Since
-\(\epsilon_i\) is independent and mean zero, \$\$ E{[}\epsilon\_i
-\textbar{} \tilde{w},x\_i,z\_i,lfp = 1{]} = 0 \textbackslash{}
+\(\epsilon_i\) is independent and mean zero, \(\epsilon_i\) is
+independent and mean zero,
 
-E{[}a\xi\_i\textbar{}lfp = 1 {]} \&= E{[}\xi\_i\textbar{}\log w\_i +
-\log \rho \textgreater{} \log R {]}\textbackslash{} \&=
-E{[}\xi\_i\textbar{} \log \rho \textgreater{} \delta\_0 + \delta z\_i +
-\xi\_i {]}\textbackslash{} \&= aE{[}\xi\_i\textbar{} \xi\_i \textless{}
-\log \rho - \delta\_0 - \delta z\_i {]}\textbackslash{}
+\[
+E[\epsilon_i | \tilde{w},x_i,z_i,lfp = 1] = 0 
+\]
 
-\$\$ Since \(\rho = 0\), we do a probit of \(lfp\) on \(z_i\) to get
+\[
+E[a\xi_i|lfp = 1 ] = E[\xi_i|\log w_i + \log \rho > \log R ]\\ = E[\xi_i| \log \rho > \delta_0 + \delta z_i + \xi_i ]\\ = aE[\xi_i| \xi_i < \log \rho - \delta_0 - \delta z_i ]\\
+\]
+
+Since \(\rho = 0\), we do a probit of \(lfp\) on \(z_i\) to get
 \(\delta_0\) and \(\delta\).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit2 }\OtherTok{=} \FunctionTok{glm}\NormalTok{(lfp }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Z,simdata,}\AttributeTok{family =} \FunctionTok{binomial}\NormalTok{(}\AttributeTok{link =} \StringTok{"probit"}\NormalTok{))}
+\FunctionTok{pander}\NormalTok{(}\FunctionTok{summary}\NormalTok{(fit2)) }
+\end{Highlighting}
+\end{Shaded}
+
+\#construct the inverse Mills ratio.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{simdata[, ai }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{predict}\NormalTok{(fit2)]  }
+\NormalTok{simdata[, m }\SpecialCharTok{:}\ErrorTok{=} \FunctionTok{dnorm}\NormalTok{(ai)}\SpecialCharTok{/}\FunctionTok{pnorm}\NormalTok{(ai)]   }
+
+\NormalTok{fit3 }\OtherTok{=} \FunctionTok{summary}\NormalTok{(}\FunctionTok{lm}\NormalTok{(lh }\SpecialCharTok{\textasciitilde{}}\NormalTok{ lw }\SpecialCharTok{+}\NormalTok{ X }\SpecialCharTok{+}\NormalTok{ m,simdata))}
+\FunctionTok{pander}\NormalTok{(fit3)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}ccccc@{}}
+\toprule
+\begin{minipage}[b]{0.21\columnwidth}\centering
+~\strut
+\end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\centering
+Estimate\strut
+\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\centering
+Std. Error\strut
+\end{minipage} & \begin{minipage}[b]{0.12\columnwidth}\centering
+t value\strut
+\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\centering
+Pr(\textgreater\textbar t\textbar)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.21\columnwidth}\centering
+\textbf{(Intercept)}\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+-0.02577\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
+0.01658\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+-1.554\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
+0.1202\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.21\columnwidth}\centering
+\textbf{lw}\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+1.267\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
+0.01117\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+113.4\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
+0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.21\columnwidth}\centering
+\textbf{X}\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+-0.6266\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
+0.004666\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+-134.3\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
+0\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.21\columnwidth}\centering
+\textbf{m}\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
+0.293\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
+0.02836\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
+10.33\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
+8.009e-25\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}cccc@{}}
+\caption{Fitting linear model: lh \textasciitilde{} lw + X +
+m}\tabularnewline
+\toprule
+\begin{minipage}[b]{0.18\columnwidth}\centering
+Observations\strut
+\end{minipage} & \begin{minipage}[b]{0.27\columnwidth}\centering
+Residual Std. Error\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering
+\(R^2\)\strut
+\end{minipage} & \begin{minipage}[b]{0.21\columnwidth}\centering
+Adjusted \(R^2\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\begin{minipage}[b]{0.18\columnwidth}\centering
+Observations\strut
+\end{minipage} & \begin{minipage}[b]{0.27\columnwidth}\centering
+Residual Std. Error\strut
+\end{minipage} & \begin{minipage}[b]{0.10\columnwidth}\centering
+\(R^2\)\strut
+\end{minipage} & \begin{minipage}[b]{0.21\columnwidth}\centering
+Adjusted \(R^2\)\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.18\columnwidth}\centering
+6405\strut
+\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering
+0.3167\strut
+\end{minipage} & \begin{minipage}[t]{0.10\columnwidth}\centering
+0.921\strut
+\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
+0.921\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
 
 \hypertarget{including-plots}{%
 \subsection{Including Plots}\label{including-plots}}
 
 You can also embed plots, for example:
 
-\includegraphics{HW2_files/figure-latex/pressure-1.pdf}
+\includegraphics{HW2-1_files/figure-latex/pressure-1.pdf}
 
 Note that the \texttt{echo\ =\ FALSE} parameter was added to the code
 chunk to prevent printing of the R code that generated the plot.
+
 
 \end{document}
