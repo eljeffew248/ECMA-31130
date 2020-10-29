@@ -2,12 +2,12 @@
 title: "ECMA 31130 HW2"
 author: "Yijing Zhang & Jeffrey Wang"
 output:
-  html_document:
-    df_print: paged
   pdf_document:
     extra_dependencies:
     - bbm
     - threeparttable
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +20,7 @@ require(data.table)
 
 ## Question 1
 
-Because from the specification of $\log R_i$ that $\xi_i$ represents all the unobserved variables that determine the individual $i$'s non-labour income, the parameter $a$ of the model captures or leaves out the effect of these unobserved characteristics on the individual's disutility of labor. 
+Because from the specification of $\log R_i$ that $\xi_i$ represents all the unobserved variables that determine the individual $i$'s non-labour income, the parameter $a$ of the model captures the correlation between $R_i$ and $\beta_i$ through these unobserved characteristics that also determine the individual's disutility from labour (if $a \neq 0$).
 
 ```{r, results='hide'}
 p  = list(gamma = 0.8,beta=1,a=1,rho=1,eta=0.2,delta=-0.2,delta0=-0.1,nu=0.5) # parameters
@@ -94,7 +94,7 @@ For a = 1:
 --------------------------------------------------------------
 
 
-We observe that the coefficients for log wage and X have larger absolute values when we set parameter $a = 0$ than when we set $a = 1$. Because if $a \neq 0$, then the term $a\xi_i$ becomes an omitted variable that enters the regression of log hours on log wage and X, which will absorb its effect on the individual's labour decision from the coefficients of log wage and X. In other words, if an individual's disutility of labour becomes correlated with her non-labour income, then the coefficients in front of log wage and X are biased, since we no longer have the exogeneity condition on $\epsilon_i$. 
+We observe that the coefficients for log wage and X are larger when we set parameter $a = 0$ than when we set $a = 1$. Because if $a \neq 0$, then the term $a\xi_i$ becomes an omitted variable that enters the regression of log hours on log wage and X, which will absorb its effect on the individual's labour decision from the coefficients of log wage and X. In other words, if an individual's disutility of labour becomes correlated with her non-labour income, then the coefficients in front of log wage and X are biased, since we no longer have the exogeneity condition on $\epsilon_i$. 
 
 ## Question 3
 
@@ -106,6 +106,8 @@ Call $\tilde{h}^*$ and $\tilde{w}^*$ the log observed observed hours and consump
 $$
  \tilde{h}^* = \frac{1}{\gamma}\log \rho + \frac{1}{\gamma}  \tilde{w}^* - \frac{1}{\gamma} (\nu x_i + \epsilon_i + a\xi_i)
 $$
+
+
 $$
  \tilde{h}^* = \frac{1}{\gamma}  \tilde{w}^* - \frac{\nu}{\gamma}x_i - \frac{\epsilon_i}{\gamma} - \frac{a\xi_i}{\gamma} + \frac{1}{\gamma} \log \rho
 $$
@@ -191,6 +193,7 @@ And since we have $\xi_i \sim -exp$, we can write
 $$
 E[\xi_i | \xi_i < -\delta_0 - \delta z_i] = 1 - \delta_0 - \delta z_i
 $$
+
 ## Question 6
 
 ```{r, results='hide'}
@@ -257,6 +260,9 @@ pander(fit5)
 
 Table: Fitting linear model: lh ~ lw + X
 
+As we can see from above, if we run the regression with all of our data for both periods, both of our recovered parameters are negatively biased. Because $\delta_0$ contribute to $R_i$, which influences an individual's $lfp$, we once again do not have the exogeneity condition if we ran our original regression on $\log w_i$ and $x_i$. 
+
+But if we now construct our heckman correction term using data from both simulations:
 
 ```{r, results = 'hide'}
 # construct the IMR, include in the regression and run
@@ -290,6 +296,7 @@ pander(fit7)
 
 Table: Fitting linear model: lh ~ lw + X + m
 
+We see that our recovered parameters are now much closer to the true values. This is because we accounted for the heterogeneity in the individual's $\delta_0$ from the two time periods by constructing the inverse mills ratio $\lambda_i$. So at each observation or individual $i$, we are able to correctly calculate the heckman correction term in our cross-section regressions. 
 
 ## Question 7
 ```{r, results='hide'}
@@ -337,21 +344,6 @@ pander(fit8)
 
 Table: Fitting linear model: lh ~ lw + X + factor(Zbin) + factor(t)
 
-
-
-
-
-
-
-
-
-
-
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+As we can see from the above results, the recovered coefficients are closer to the estimand of interest. 
+It's because adding Zbin and t into the model as dummy variables is equivalent to controlling for the 
+group effect and time effect.
