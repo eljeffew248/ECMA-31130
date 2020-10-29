@@ -20,7 +20,7 @@ require(data.table)
 
 ## Question 1
 
-Because from the specification of $\log R_i$ that $\xi_i$ represents all the unobserved variables that determine the individual $i$'s non-labour income, the parameter $a$ of the model captures the correlation between $R_i$ and $\beta_i$ through these unobserved characteristics that also determine the individual's disutility from labour (if $a \neq 0$).
+The parameter $a$ of the model captures whether or not there is correlation between $R_i$ and $\beta_i$. Intuitively, from the specification of $\log R_i$, $\xi_i$ represents all the unobserved variables that determine the individual $i$'s non-labour income, and if $a \neq 0$, then these unobserved characteristics also enter into determining the individual's  disutility from labour. 
 
 ```{r, results='hide'}
 p  = list(gamma = 0.8,beta=1,a=1,rho=1,eta=0.2,delta=-0.2,delta0=-0.1,nu=0.5) # parameters
@@ -94,7 +94,7 @@ For a = 1:
 --------------------------------------------------------------
 
 
-We observe that the coefficients for log wage and X are larger when we set parameter $a = 0$ than when we set $a = 1$. Because if $a \neq 0$, then the term $a\xi_i$ becomes an omitted variable that enters the regression of log hours on log wage and X, which will absorb its effect on the individual's labour decision from the coefficients of log wage and X. In other words, if an individual's disutility of labour becomes correlated with her non-labour income, then the coefficients in front of log wage and X are biased, since we no longer have the exogeneity condition on $\epsilon_i$. 
+We observe that the coefficients for log wage and X are closer to the true values when we set $a = 0$ as opposed to $a = 1$. Because if $a \neq 0$, then the term $a\xi_i$ becomes an omitted variable that enters the regression of log hours on log wage and X, which will absorb its effect on the individual's hours decision from the coefficients of log wage and X. In other words, if an individual's disutility of labour becomes correlated with her non-labour income, then the coefficients in front of log wage and X are biased, since we no longer have the exogeneity condition on the error term of this regression. 
 
 ## Question 3
 
@@ -345,5 +345,4 @@ pander(fit8)
 Table: Fitting linear model: lh ~ lw + X + factor(Zbin) + factor(t)
 
 As we can see from the above results, the recovered coefficients are closer to the estimand of interest. 
-It's because adding Zbin and t into the model as dummy variables is equivalent to controlling for the 
-group effect and time effect.
+It's because adding Zbin and t into the model as dummy variables captures the heterogeneity of individual's self-selection into labour from different groups and time periods. Equivalently, we are controlling for the group and time effects. But we see that this does not fully capture their effects as the coefficients still have discrepancies from the true values. This is because of our assumption that their composition effects can be fully accounted for by adding them (BDM (98)).
