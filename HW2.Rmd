@@ -345,4 +345,4 @@ pander(fit8)
 Table: Fitting linear model: lh ~ lw + X + factor(Zbin) + factor(t)
 
 As we can see from the above results, the recovered coefficients are closer to the estimand of interest. 
-It's because adding Zbin and t into the model as dummy variables captures the heterogeneity in group and time effects on individual labour decisions. Equivalently, we are controlling for the group and time effects.
+It's because adding Zbin and t into the model as dummy variables captures the heterogeneity of individual's self-selection into labour from different groups and time periods. Equivalently, we are controlling for the group and time effects. But we see that this does not fully capture their effects as the coefficients still have discrepancies from the true values. This is because of our assumption that their composition effects can be fully accounted for by adding them (BDM (98)).
